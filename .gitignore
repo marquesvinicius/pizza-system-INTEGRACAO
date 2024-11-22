@@ -1,1 +1,10 @@
-node_modules
+# Ignora arquivos desktop.ini em qualquer diretório
+**/desktop.ini
+
+# Outras configurações típicas para Node.js
+node_modules/
+dist/
+.env
+
+# Ignorar o arquivo de lock (se você preferir)
+package-lock.json
