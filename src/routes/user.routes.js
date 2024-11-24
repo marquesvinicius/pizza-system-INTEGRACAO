@@ -11,15 +11,29 @@ const authService = new AuthService();
 
 // Rota de login
 userRoutes.post("/login", async (req, res) => {
-    const { email, password } = req.body;
-  
-    try {
-      const { user, token } = await authService.login(email, password);
-      res.status(200).json({ user, token });
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  });
+  const { email, password } = req.body;
+
+  try {
+    const { accessToken, refreshToken } = await authService.login(email, password);
+    res.status(200).json({ 
+      token: accessToken, // Mantendo 'token' para compatibilidade com os testes
+      refreshToken 
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+  // Rota de refresh token (para obter um novo access token com base no refresh token)
+userRoutes.post("/refresh-token", async (req, res) => {
+  const { refreshToken } = req.body;
+
+  try {
+    const newAccessToken = await authService.refreshToken(refreshToken);
+    res.status(200).json({ accessToken: newAccessToken });
+  } catch (err) {
+    res.status(401).json({ error: err.message });
+  }
+});
 
 // Rota para cadastrar um novo usuário
 userRoutes.post("/register", async (req, res) => {

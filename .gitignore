@@ -1,5 +1,8 @@
 # Ignora arquivos desktop.ini em qualquer diretório
 **/desktop.ini
+desktop.ini
+
+DER Pizzaria - INTEGRAÇAO DE APLICATIVOS.pdf
 
 # Outras configurações típicas para Node.js
 node_modules/
