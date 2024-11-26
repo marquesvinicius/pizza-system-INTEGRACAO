@@ -1,7 +1,7 @@
 **Descrição**:  
 Este projeto é um sistema backend desenvolvido para gerenciar pedidos de uma pizzaria, criado como parte da disciplina de **Integração de Aplicativos** do curso de Engenharia de Software. Ele demonstra o uso de tecnologias modernas para construção de APIs RESTful, com foco em integração e segurança.  
 
-O sistema foi projetado para lidar com operações como gerenciamento de usuários, clientes, produtos e pedidos, incorporando autenticação segura com Bearer Tokens (JWT) e conexão a um banco de dados relacional PostgreSQL via TypeORM.  
+O sistema foi projetado para lidar com operações como gerenciamento de usuários, clientes, produtos e pedidos, incorporando autenticação segura com Bearer Tokens (JWT) e conexão a um banco de dados relacional PostgreSQL. 
 
 **Tecnologias Utilizadas**:
 - **Node.js** com **Express.js** para construção do backend.
