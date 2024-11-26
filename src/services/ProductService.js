@@ -20,12 +20,17 @@ class ProductService {
   // Listar todos os produtos
   async listarTodos() {
     try {
-      const result = await db.query("SELECT * FROM products");
-      return result.rows;
+      const result = await db.query("SELECT id, name, category, description, price, size FROM products");
+      const products = result.rows.map(product => ({
+        ...product,
+        price: parseFloat(product.price), // Converte price para número
+      }));
+      return products;
     } catch (error) {
       throw new Error(`Erro ao listar produtos: ${error.message}`);
     }
   }
+  
 
   // Buscar produto por ID
   async buscarPorId(id) {

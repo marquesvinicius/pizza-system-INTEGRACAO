@@ -53,21 +53,35 @@ class OrderService {
 
     async listarTodos() {
         try {
+            console.log("Iniciando busca de pedidos"); // Log de início
             const result = await db.query(`
-                SELECT o.*, p.name as product_name, p.price as product_price
+                SELECT 
+                  o.*, 
+                  p.name as product_name, 
+                  p.price as product_price
                 FROM orders o
                 JOIN products p ON o.product_id = p.id
                 ORDER BY o.created_at DESC
             `);
-            return result.rows;
+
+            const orders = result.rows.map(order => ({
+                ...order,
+                price_products: parseFloat(order.price_products), // Convertendo para número
+                price_total: parseFloat(order.price_total)        // Convertendo para número
+            }));
+
+            console.log("Número de pedidos encontrados:", orders.length); // Log de quantidade
+            return orders;
         } catch (error) {
-            throw error;
+            console.error("Erro completo na busca de pedidos:", error);
+            throw new Error(`Erro ao listar pedidos: ${error.message}`);
         }
     }
 
+
     async buscarPorId(id) {
         if (!id) throw new Error("ID do pedido é obrigatório");
-        
+
         try {
             const result = await db.query(`
                 SELECT o.*, p.name as product_name, p.price as product_price
@@ -75,7 +89,7 @@ class OrderService {
                 JOIN products p ON o.product_id = p.id
                 WHERE o.id = $1
             `, [id]);
-            
+
             if (result.rows.length === 0) {
                 throw new Error("Pedido não encontrado");
             }
@@ -86,13 +100,22 @@ class OrderService {
     }
 
     async atualizarStatus(id, novoStatus) {
-        if (!id) throw new Error("ID do pedido é obrigatório");
-        if (!novoStatus) throw new Error("Novo status é obrigatório");
+        console.log(`atualizarStatus chamado: ID ${id}, Novo Status ${novoStatus}`);
+
+        if (!id) {
+            console.error('ID do pedido é obrigatório');
+            throw new Error("ID do pedido é obrigatório");
+        }
+        if (!novoStatus) {
+            console.error('Novo status é obrigatório');
+            throw new Error("Novo status é obrigatório");
+        }
 
         try {
-            const statusValidos = ['pending', 'em preparo', 'pronto', 'entregue'];
-            
+            const statusValidos = ['pending', 'em preparo', 'pronto', 'entregue', 'cancelado'];
+
             if (!statusValidos.includes(novoStatus)) {
+                console.error(`Status inválido: ${novoStatus}`);
                 throw new Error("Status inválido");
             }
 
@@ -105,15 +128,20 @@ class OrderService {
                 [novoStatus, id]
             );
 
+            console.log('Resultado da atualização:', result.rows);
+
             if (result.rows.length === 0) {
+                console.error(`Nenhum pedido encontrado com ID ${id}`);
                 throw new Error("Pedido não encontrado");
             }
 
             return result.rows[0];
         } catch (error) {
+            console.error('Erro completo no atualizarStatus:', error);
             throw error;
         }
     }
+
 }
 
 module.exports = OrderService;

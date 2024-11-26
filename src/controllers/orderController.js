@@ -35,9 +35,11 @@ class OrderController {
         }
     }
 
+    // Atualizar status de pedido
     async atualizarStatus(req, res) {
         try {
-            const order = await orderService.atualizarStatus(req.params.id, req.body.status);
+            const novoStatus = req.body.status || 'cancelado'; // Default para 'cancelado'
+            const order = await orderService.atualizarStatus(req.params.id, novoStatus);
             return res.status(200).json(order);
         } catch (error) {
             console.error("Erro ao atualizar status:", error);

@@ -1,0 +1,214 @@
+<!-- views/orders.ejs -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <%- include('_menu') %>
+
+        <div class="container mt-4">
+            <h1>Pedidos</h1>
+
+            <% if (orders && orders.length> 0) { %>
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Preço Produtos</th>
+                            <th>Preço Total</th>
+                            <th>Retirada</th>
+                            <th>Método Pagamento</th>
+                            <th>Status</th>
+                            <th>Data Criação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order=> { %>
+                            <tr>
+                                <td>
+                                    <%= order.id %>
+                                </td>
+                                <td>
+                                    <%= order.product_name %>
+                                </td>
+                                <td>
+                                    <%= order.quantity %>
+                                </td>
+                                <td>R$ <%= order.price_products.toFixed(2) %>
+                                </td>
+                                <td>R$ <%= order.price_total.toFixed(2) %>
+                                </td>
+                                <td>
+                                    <%= order.pickup ? 'Sim' : 'Não' %>
+                                </td>
+                                <td>
+                                    <%= order.payment_method %>
+                                </td>
+                                <td>
+                                    <span class="badge 
+                  <%= 
+                    order.status === 'pending' ? 'bg-warning' : 
+                    order.status === 'em preparo' ? 'bg-info' : 
+                    order.status === 'pronto' ? 'bg-success' : 
+                    order.status === 'entregue' ? 'bg-primary' : 
+                    'bg-secondary'
+                  %>
+                ">
+                                        <%= order.status==='pending' ? 'Pendente' : order.status==='em preparo'
+                                            ? 'Em Preparação' : order.status==='pronto' ? 'Pronto' :
+                                            order.status==='entregue' ? 'Entregue' : order.status %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <%= new Date(order.created_at).toLocaleDateString('pt-BR') %>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-primary" data-order-id="<%= order.id %>"
+                                            onclick="viewOrderDetails(this)">
+                                            Detalhes
+                                        </button>
+                                        <% if (order.status==='pending' ) { %>
+                                            <button class="btn btn-sm btn-danger" data-order-id="<%= order.id %>"
+                                                onclick="cancelOrder(this)">
+                                                Cancelar
+                                            </button>
+                                            <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+                <% } else { %>
+                    <div class="alert alert-info" role="alert">
+                        Nenhum pedido encontrado.
+                    </div>
+                    <% } %>
+        </div>
+
+        <!-- Modal de Detalhes do Pedido -->
+        <div class="modal fade" id="orderDetailsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Detalhes do Pedido</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="orderDetailsContent">
+                        <!-- Conteúdo será preenchido dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Função para visualizar detalhes do pedido
+            async function viewOrderDetails(button) {
+                const orderId = button.getAttribute('data-order-id');
+
+                try {
+                    const response = await fetch(`/orders/${orderId}`);
+
+                    if (!response.ok) {
+                        const errorData = await response.text();
+                        console.error('Erro na resposta:', errorData);
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+
+                    const order = await response.json();
+
+                    // Adicione verificações para garantir que os valores são números
+                    const modalContent = `
+      <div class="row">
+        <div class="col-md-6">
+          <h6>Informações do Pedido</h6>
+          <p><strong>ID:</strong> ${order.id}</p>
+          <p><strong>Produto:</strong> ${order.product_name}</p>
+          <p><strong>Quantidade:</strong> ${order.quantity}</p>
+          <p><strong>Preço do Produto:</strong> R$ ${order.price_products ? Number(order.price_products).toFixed(2) : 'N/A'}</p>
+          <p><strong>Preço Total:</strong> R$ ${order.price_total ? Number(order.price_total).toFixed(2) : 'N/A'}</p>
+        </div>
+        <div class="col-md-6">
+          <h6>Detalhes Adicionais</h6>
+          <p><strong>Retirada:</strong> ${order.pickup ? 'Sim' : 'Não'}</p>
+          <p><strong>Método de Pagamento:</strong> ${order.payment_method}</p>
+          <p><strong>Status:</strong> ${order.status}</p>
+          <p><strong>Data de Criação:</strong> ${order.created_at ? new Date(order.created_at).toLocaleString('pt-BR') : 'N/A'}</p>
+          ${order.observation ? `<p><strong>Observação:</strong> ${order.observation}</p>` : ''}
+        </div>
+      </div>
+    `;
+
+                    document.getElementById('orderDetailsContent').innerHTML = modalContent;
+
+                    // Mostrar modal
+                    const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+                    modal.show();
+
+                } catch (error) {
+                    console.error('Erro ao buscar detalhes do pedido:', error);
+                    alert(`Não foi possível carregar os detalhes do pedido: ${error.message}`);
+                }
+            }
+
+            // Função para cancelar pedido
+            async function cancelOrder(button) {
+                const orderId = button.getAttribute('data-order-id');
+
+                if (!confirm('Tem certeza que deseja cancelar este pedido?')) {
+                    return;
+                }
+
+                try {
+                    console.log(`Tentando cancelar pedido ${orderId}`); // Log de debug
+
+                    const response = await fetch(`/orders/${orderId}/cancel`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    console.log('Resposta do servidor:', response); // Log de debug
+
+                    if (!response.ok) {
+                        const errorData = await response.text();
+                        console.error('Erro na resposta:', errorData);
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+
+                    const updatedOrder = await response.json();
+
+                    // Atualizar status na tabela
+                    const statusBadge = button.closest('tr').querySelector('.badge');
+                    if (statusBadge) {
+                        statusBadge.textContent = 'Cancelado';
+                        statusBadge.className = 'badge bg-danger';
+                    }
+
+                    // Remover botão de cancelamento
+                    button.remove();
+
+                    alert('Pedido cancelado com sucesso!');
+
+                } catch (error) {
+                    console.error('Erro ao cancelar pedido:', error);
+                    alert(`Não foi possível cancelar o pedido: ${error.message}`);
+                }
+            }
+
+        </script>
+</body>
+
+</html>
