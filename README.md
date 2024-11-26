@@ -6,7 +6,7 @@ O sistema foi projetado para lidar com operações como gerenciamento de usuári
 **Tecnologias Utilizadas**:
 - **Node.js** com **Express.js** para construção do backend.
 - **PostgreSQL** para gerenciamento de dados.
-- **TypeORM** para manipulação e migração de banco de dados.
+- ~~**TypeORM** para manipulação e migração de banco de dados.~~
 - **Jest** para criação de testes unitários e validação do código.
 - **CORS** para permitir integração segura entre front-end e back-end.
 - **JWT** para autenticação e segurança das requisições.
