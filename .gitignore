@@ -11,3 +11,4 @@ dist/
 
 # Ignorar o arquivo de lock (se você preferir)
 package-lock.json
+desktop.ini
